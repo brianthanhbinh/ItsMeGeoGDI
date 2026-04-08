@@ -6,10 +6,9 @@ import ctypes.wintypes
 import struct
 import random
 
-# --- 1. INITIALIZE ---
 pygame.init()
 pygame.mixer.init()
-WIDTH, HEIGHT = 400, 300 
+WIDTH, HEIGHT = 500, 300 
 
 user32 = ctypes.windll.user32
 gdi32 = ctypes.windll.gdi32
@@ -17,18 +16,15 @@ gdi32 = ctypes.windll.gdi32
 sw = user32.GetSystemMetrics(0)
 sh = user32.GetSystemMetrics(1)
 
-# Position: Moved away from the border
 os.environ['SDL_VIDEO_WINDOW_POS'] = f"{sw - WIDTH - 100},{sh - HEIGHT - 100}"
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
 
-# Stay on top
 hwnd = pygame.display.get_wm_info()['window']
 user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002)
 
 title_font = pygame.font.SysFont("Impact", 28)
-title_text = title_font.render("FEED ME OR SUFFER", True, (255, 0, 0))
+title_text = title_font.render("HI, I'M GEO, GIVE ME SOME PILL!", True, (255, 255, 255))
 
-# --- 2. ASSETS ---
 try:
     cube_img = pygame.image.load("cube_458.png").convert_alpha()
     spike_img = pygame.image.load("Spike.png").convert_alpha()
@@ -47,7 +43,6 @@ def stamp_png(hdc, surface, x, y):
     bmi = struct.pack('<IiiHHIIiiII', 40, w, -h, 1, 32, 0, 0, 0, 0, 0, 0)
     gdi32.StretchDIBits(hdc, x, y, w, h, 0, 0, w, h, img_str, bmi, 0, 0x00CC0020)
 
-# --- 3. MAIN LOOP ---
 hdc_handle = user32.GetDC(0)
 time_left = 60.0 
 gdi_pos = [sw // 2, sh // 2]
@@ -57,19 +52,15 @@ clock = pygame.time.Clock()
 while True:
     dt = clock.tick(60) / 1000.0
     
-    # Get Mouse Pos
     point = ctypes.wintypes.POINT()
     user32.GetCursorPos(ctypes.byref(point))
     mx, my = point.x, point.y
     
-    # --- ANTI-CLOSE LOGIC ---
     if time_left <= 0:
         # Aggressive jitter
         jx = mx + random.randint(-20, 20)
         jy = my + random.randint(-20, 20)
         
-        # If the mouse gets too close to the Pygame window, throw it away!
-        # This makes dropping the 'pill' very difficult.
         win_x, win_y = sw - WIDTH - 100, sh - HEIGHT - 100
         if win_x < mx < win_x + WIDTH and win_y < my < win_y + HEIGHT:
             user32.SetCursorPos(mx - 150, my - 150)
@@ -96,10 +87,8 @@ while True:
                 time_left = max(0, time_left - 30)
                 gdi32.PatBlt(hdc_handle, 0, 0, sw, sh, 0x5A0049)
 
-    # --- 4. RENDER UI ---
     screen.fill((5, 5, 5))
     
-    # Pulsing red background when angry
     if time_left <= 0:
         screen.fill((random.randint(20, 50), 0, 0))
     
