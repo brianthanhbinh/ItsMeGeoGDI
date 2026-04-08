@@ -1,2 +1,5 @@
 # ItsMeGeoGDI
 hitbox...
+
+#Requirement:
+Pygame
